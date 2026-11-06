@@ -1,0 +1,19 @@
+# ============================================================
+# FW-OT-01  OT Boundary Firewall  (Conduit: L3.5 IDMZ <-> L2/L1)
+# Zones: 10.10.0.0/16 Corporate IT | 10.20.5.0/24 Mgmt
+#        10.30.0.0/16 L2 Supervisory | 10.40.1.0/24 L1 Control (PLCs)
+# Exported by: netadmin  |  Export date: 2025-03-14
+# ============================================================
+*filter
+:INPUT DROP [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -s 10.20.5.10/32 -p tcp --dport 22 -j ACCEPT
+-A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -s 10.30.1.0/24 -d 10.40.1.0/24 -p tcp --dport 502 -j ACCEPT
+# TEMP - corporate engineering access for commissioning (CHG-1184) - remove after SAT
+-A FORWARD -s 10.10.0.0/16 -d 10.40.1.20/32 -p tcp --dport 502 -j ACCEPT
+-A FORWARD -s 10.30.2.15/32 -d 10.40.1.0/24 -p tcp --dport 44818 -j ACCEPT
+-A FORWARD -j LOG --log-prefix "FW-OT-DENY: "
+COMMIT

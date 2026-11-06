@@ -1,0 +1,6 @@
+{
+  "system": "HIST-01 Process Historian",
+  "tls": {"enabled": true, "min_version": "TLSv1.0", "ciphers": ["TLS_RSA_WITH_3DES_EDE_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"], "certificate_expiry": "2027-01-15"},
+  "at_rest": {"enabled": true, "algorithm": "AES-256-GCM", "key_store": "TPM-sealed"},
+  "backup":  {"schedule": "daily 02:00", "target": "nas01", "encrypted": false, "offline_copy": true}
+}

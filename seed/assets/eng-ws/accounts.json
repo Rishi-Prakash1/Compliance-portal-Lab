@@ -1,0 +1,12 @@
+{
+  "system": "EWS-01 / OT Active Directory (otdom.local)",
+  "exported": "2026-10-30",
+  "accounts": [
+    {"username": "a.rao",        "role": "Control Engineer",   "privileged": true,  "mfa": true,  "shared": false, "enabled": true,  "last_login": "2026-10-29"},
+    {"username": "s.iyer",       "role": "OT Administrator",   "privileged": true,  "mfa": false, "shared": false, "enabled": true,  "last_login": "2026-10-28"},
+    {"username": "operator",     "role": "HMI Operator (shift)","privileged": false, "mfa": false, "shared": true,  "enabled": true,  "last_login": "2026-10-30"},
+    {"username": "hist_svc",     "role": "Historian service",  "privileged": false, "mfa": false, "shared": false, "enabled": true,  "last_login": "2026-10-30", "interactive_logon": false},
+    {"username": "vendor_ctrl",  "role": "Integrator support", "privileged": true,  "mfa": true,  "shared": false, "enabled": true,  "last_login": "2026-09-02"},
+    {"username": "k.menon",      "role": "Former engineer",    "privileged": true,  "mfa": false, "shared": false, "enabled": false, "last_login": "2025-12-11"}
+  ]
+}

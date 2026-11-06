@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block body %}
+<div class="row"><div><h1>Compliance Obligation Register</h1><p class="sub">Map regulatory clauses (First Schedule, National Acts, IEC 62443 baselines) to technical controls.</p></div>
+<a class="btn ghost right" href="/export/register.csv">Export CSV</a></div>
+<div class="grid g2" style="grid-template-columns:2fr 1fr">
+<div class="card" style="overflow-x:auto"><table><tr><th>ID</th><th>Source / Clause</th><th>Requirement</th><th>Control ref</th><th>Owner</th><th>Status</th><th></th></tr>
+{% for o in obs %}<tr><td class="mono"><a href="/register/{{o.id}}">{{o.id}}</a>{% if o.origin=='trainee' %}<div class="small">added by trainee</div>{% endif %}</td>
+<td><b>{{o.source}}</b><div class="small">{{o.clause}}</div></td><td><b>{{o.title}}</b><div class="small">{{o.requirement}}</div></td><td class="small">{{o.control_ref}}</td>
+<td class="small">{{o.owner}}<br>{{o.frequency}}</td><td><span class="tag {{o.status|replace(' ','-')}}">{{o.status}}</span></td>
+<td><a href="?edit={{o.id}}">edit</a></td></tr>{% endfor %}</table></div>
+<div class="card"><h2 style="margin-top:0">{{ 'Edit ' ~ edit.id if edit else 'Add obligation' }}</h2>
+<form method="post">
+<label>Obligation ID (OBL-…)</label><input name="id" required value="{{edit.id if edit}}" {{'readonly' if edit}} placeholder="OBL-CERTIN-02">
+<label>Source</label><select name="source">{% for s in ['First Schedule','National Act','IEC 62443 Baseline','Contractual / Supplier'] %}<option {{'selected' if edit and edit.source==s}}>{{s}}</option>{% endfor %}</select>
+<label>Clause</label><input name="clause" required value="{{edit.clause if edit}}">
+<label>Title</label><input name="title" required value="{{edit.title if edit}}">
+<label>Requirement (testable statement)</label><textarea name="requirement" required>{{edit.requirement if edit}}</textarea>
+<label>Technical control reference</label><input name="control_ref" value="{{edit.control_ref if edit}}" placeholder="IEC 62443-3-3 SR 2.11">
+<div class="row"><div style="flex:1"><label>Owner</label><input name="owner" value="{{edit.owner if edit}}"></div><div style="flex:1"><label>Review frequency</label><input name="frequency" value="{{edit.frequency if edit}}"></div></div>
+<div class="row" style="margin-top:12px"><button>{{ 'Save' if edit else 'Add to register' }}</button>{% if edit %}<a href="/register" class="small">cancel</a>{% endif %}</div></form>
+{% if edit %}<form method="post" action="/register/{{edit.id}}/delete" onsubmit="return confirm('Delete {{edit.id}}?')" style="margin-top:14px"><button class="danger">Delete obligation</button></form>{% endif %}
+</div></div>
+{% endblock %}

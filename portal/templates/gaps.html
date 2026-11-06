@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block body %}
+<h1>Automated Gap Analysis</h1>
+{% if not run %}<p class="sub">No analyzer runs yet. In the auditor container run <span class="mono">analyze</span>.</p>{% else %}
+{% set c=json.loads(run.counts) %}
+<p class="sub">Run #{{run.id}} · collection <span class="mono">{{run.collection_id}}</span> · audit date {{run.audit_date}}</p>
+<div class="row" style="margin-bottom:12px"><a class="tag Not-Assessed" href="/gaps">ALL</a>{% for s in ['FAIL','NO_EVIDENCE','ERROR','PASS'] %}<a class="tag {{s}}" href="?status={{s}}">{{s}} {{c[s]}}</a>{% endfor %}</div>
+<div class="card" style="overflow-x:auto"><table><tr><th>Check</th><th>Obligation</th><th>Title</th><th>Evidence</th><th>Severity</th><th>Result</th><th>Detail / root cause</th></tr>
+{% for r in res %}<tr><td class="mono">{{r.check_id}}</td>
+<td class="mono">{% if r.obligation_id in known %}<a href="/register/{{r.obligation_id}}">{{r.obligation_id}}</a>{% else %}{{r.obligation_id}}<div class="tag NO_EVIDENCE">not in register</div>{% endif %}</td>
+<td>{{r.title}}</td><td class="mono small">{{r.asset}}/{{r.artifact}}</td><td><span class="tag {{r.severity}}">{{r.severity}}</span></td><td><span class="tag {{r.status}}">{{r.status}}</span></td>
+<td class="small">{{r.detail}}{% if r.status!='PASS' %}<div style="margin-top:4px"><b>Root cause:</b> {{r.root_cause}}</div>{% endif %}</td></tr>{% endfor %}</table></div>{% endif %}
+{% if runs|length > 1 %}<h2>Run history</h2><div class="card"><table><tr><th>Run</th><th>Collection</th><th>PASS</th><th>FAIL</th><th>NO_EVIDENCE</th></tr>
+{% for r in runs %}{% set k=json.loads(r.counts) %}<tr><td>#{{r.id}}</td><td class="mono">{{r.collection_id}}</td><td>{{k.PASS}}</td><td>{{k.FAIL}}</td><td>{{k.NO_EVIDENCE}}</td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}

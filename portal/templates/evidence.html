@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block body %}
+<div class="row"><div><h1>Virtual Evidence Repository</h1><p class="sub">Artifacts collected from the OT range, hashed at collection. Link each artifact to the obligations it evidences.</p></div>
+<div class="right row"><a class="btn ghost" href="{{repo}}/" target="_blank">Browse repository ↗</a><a class="btn ghost" href="/export/evidence.csv">Export links CSV</a></div></div>
+{% if not m %}<div class="warn">No evidence snapshot yet. In the auditor container run <span class="mono">collect</span>.</div>{% else %}
+<div class="grid g2" style="grid-template-columns:2fr 1fr">
+<div class="card" style="overflow-x:auto"><div class="small">Collection <span class="mono">{{m.collection_id}}</span> · collector {{m.collector}} · {{m.collected_at}}</div>
+<table><tr><th>Artifact</th><th>SHA-256</th><th>Linked obligations</th></tr>
+{% for a in m.artifacts %}<tr><td><a class="mono" href="{{repo}}/current/{{a.path}}" target="_blank">{{a.path}}</a><div class="small">{{a.asset_description}}</div></td>
+<td class="mono small">{{ (a.sha256[:20] ~ '…') if a.sha256 else a.status }}</td>
+<td>{% for l in by_art.get(a.path, []) %}<div class="row"><a class="mono" href="/register/{{l.obligation_id}}">{{l.obligation_id}}</a><span class="small">{{l.linked_by}}</span>
+<form method="post" action="/evidence/unlink/{{l.id}}" style="margin-left:auto"><button class="danger">×</button></form></div>{% else %}<span class="small">—</span>{% endfor %}</td></tr>{% endfor %}</table></div>
+<div class="card"><h2 style="margin-top:0">Link evidence → obligation</h2><form method="post">
+<label>Artifact</label><select name="artifact">{% for a in m.artifacts if a.sha256 %}<option>{{a.path}}</option>{% endfor %}</select>
+<label>Obligation</label><select name="obligation_id">{% for o in obs %}<option value="{{o.id}}">{{o.id}} — {{o.title}}</option>{% endfor %}</select>
+<label>Auditor name</label><input name="linked_by" placeholder="trainee">
+<label>Assessment note (what does this artifact prove or disprove?)</label><textarea name="note" required></textarea>
+<button style="margin-top:12px">Link evidence</button></form>
+<p class="small" style="margin-top:14px">The analyzer auto-links artifacts it evaluates. Documentary evidence (policies, plans, calendars) for obligations without automated checks must be linked manually.</p></div></div>{% endif %}
+{% endblock %}

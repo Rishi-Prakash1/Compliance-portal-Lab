@@ -1,0 +1,253 @@
+# Exercise 5.1 - Automated compliance checks
+# Each check maps ONE technical artifact (in the evidence repository) to ONE obligation.
+# Types: regex_present | regex_absent | json_equals | json_min | json_in |
+#        json_none_match | json_none_expired | date_within_days
+checks:
+  - id: CHK-01
+    obligation: OBL-62443-ZC
+    title: Conduit default policy is deny
+    asset: ot-fw
+    artifact: iptables.rules
+    type: regex_present
+    pattern: '^:FORWARD DROP'
+    severity: High
+    root_cause: Firewall built permit-by-default during commissioning; baseline never hardened.
+    remediation: Set FORWARD chain policy to DROP and enumerate permitted conduit flows.
+
+  - id: CHK-02
+    obligation: OBL-62443-ZC
+    title: No Corporate IT to Level 1 Modbus flow
+    asset: ot-fw
+    artifact: iptables.rules
+    type: regex_absent
+    pattern: '^-A FORWARD -s 10\.10\.\S+ .*--dport 502 .*-j ACCEPT'
+    severity: Critical
+    root_cause: Temporary commissioning rule (CHG-1184) not removed after SAT - no change-closure check.
+    remediation: Remove the 10.10.0.0/16 -> 10.40.1.20:502 rule; add post-SAT rule review to change process.
+
+  - id: CHK-03
+    obligation: OBL-62443-ZC
+    title: Denied conduit traffic is logged
+    asset: ot-fw
+    artifact: iptables.rules
+    type: regex_present
+    pattern: '-j LOG'
+    severity: Medium
+    root_cause: n/a
+    remediation: Add LOG target before final deny.
+
+  - id: CHK-04
+    obligation: OBL-FS-01
+    title: Firewall config backup is not older than 30 days
+    asset: ot-fw
+    artifact: backup_meta.json
+    type: date_within_days
+    path: last_backup
+    days: 30
+    severity: Medium
+    root_cause: Manual backup process with no schedule or owner verification.
+    remediation: Automate monthly config export with hash; record in First Schedule register.
+
+  - id: CHK-05
+    obligation: OBL-FS-01
+    title: Backup integrity hash recorded
+    asset: ot-fw
+    artifact: backup_meta.json
+    type: json_equals
+    path: integrity_hash_recorded
+    value: true
+    severity: Low
+    root_cause: Backup procedure does not require hashing.
+    remediation: Record SHA-256 of each backup in the register.
+
+  - id: CHK-06
+    obligation: OBL-FS-02
+    title: No enabled shared interactive accounts
+    asset: eng-ws
+    artifact: accounts.json
+    type: json_none_match
+    path: accounts
+    where: {shared: true, enabled: true}
+    report_field: username
+    severity: High
+    root_cause: Shift-based HMI operation designed around a generic login.
+    remediation: Issue named operator accounts (or HMI quick-switch with individual credentials); disable 'operator'.
+
+  - id: CHK-07
+    obligation: OBL-62443-AUTH
+    title: All enabled privileged accounts have MFA
+    asset: eng-ws
+    artifact: accounts.json
+    type: json_none_match
+    path: accounts
+    where: {privileged: true, mfa: false, enabled: true}
+    report_field: username
+    severity: High
+    root_cause: MFA not enforced by policy (mfa.enforced_for_privileged=false).
+    remediation: Enrol remaining privileged users in TOTP and enforce MFA for the privileged group.
+
+  - id: CHK-08
+    obligation: OBL-62443-AUTH
+    title: Password minimum length >= 12
+    asset: eng-ws
+    artifact: iam_policy.json
+    type: json_min
+    path: password.min_length
+    value: 12
+    severity: Medium
+    root_cause: Domain policy inherited from legacy defaults.
+    remediation: Raise minimum length to 12 or more in OT domain GPO.
+
+  - id: CHK-09
+    obligation: OBL-62443-AUTH
+    title: Account lockout enabled
+    asset: eng-ws
+    artifact: iam_policy.json
+    type: json_min
+    path: lockout.threshold
+    value: 1
+    severity: Medium
+    root_cause: Lockout disabled to avoid HMI lock-outs; no risk assessment documented.
+    remediation: Set lockout threshold (e.g. 5-10) for interactive accounts; exempt HMI kiosk via compensating control.
+
+  - id: CHK-10
+    obligation: OBL-CERTIN-01
+    title: Log retention >= 180 days
+    asset: eng-ws
+    artifact: iam_policy.json
+    type: json_min
+    path: logging.retention_days
+    value: 180
+    severity: High
+    root_cause: SIEM retention sized for 90 days at deployment (pre-2022 Directions).
+    remediation: Increase SIEM retention to 180 days in-country; verify storage capacity.
+
+  - id: CHK-11
+    obligation: OBL-62443-CRYPTO
+    title: TLS minimum version 1.2+
+    asset: historian
+    artifact: crypto.json
+    type: json_in
+    path: tls.min_version
+    values: [TLSv1.2, TLSv1.3]
+    severity: High
+    root_cause: Legacy client compatibility kept TLS 1.0 enabled.
+    remediation: Set min TLS 1.2, remove 3DES/RSA-kx ciphers; upgrade legacy clients.
+
+  - id: CHK-12
+    obligation: OBL-62443-CRYPTO
+    title: Encryption at rest enabled
+    asset: historian
+    artifact: crypto.json
+    type: json_equals
+    path: at_rest.enabled
+    value: true
+    severity: Medium
+    root_cause: n/a
+    remediation: Enable encryption at rest.
+
+  - id: CHK-13
+    obligation: OBL-62443-CRYPTO
+    title: Historian backups encrypted
+    asset: historian
+    artifact: crypto.json
+    type: json_equals
+    path: backup.encrypted
+    value: true
+    severity: Medium
+    root_cause: Backup job configured without encryption key.
+    remediation: Enable AES-256 backup encryption; store keys separately from NAS.
+
+  - id: CHK-14
+    obligation: OBL-CERTIN-02
+    title: Clock synced to NIC / NPL NTP
+    asset: historian
+    artifact: ntp.conf
+    type: regex_present
+    pattern: '^server\s+(samay1\.nic\.in|samay2\.nic\.in|time\.nplindia\.org|10\.20\.5\.1\b.*#\s*stratum2-npl)'
+    severity: Medium
+    root_cause: Default public pool retained from OS image.
+    remediation: Point time sync to NIC/NPL servers (or internal stratum-2 that syncs to them, documented).
+
+  - id: CHK-15
+    obligation: OBL-FS-03
+    title: No expired compensating controls
+    asset: plc-gw
+    artifact: compensating_controls.json
+    type: json_none_expired
+    path: controls
+    field: valid_until
+    report_field: id
+    severity: High
+    root_cause: No review trigger before compensating control expiry.
+    remediation: Re-assess CC-001, re-approve with new validity or implement permanent fix; add 30-day expiry alert.
+
+  - id: CHK-16
+    obligation: OBL-62443-AUTHZ
+    title: Modbus write limited to authorised EWS
+    asset: plc-gw
+    artifact: modbus_gw.json
+    type: regex_absent
+    pattern: '0\.0\.0\.0/0'
+    severity: Critical
+    root_cause: Wildcard added during troubleshooting; invalidates compensating control CC-001.
+    remediation: Remove 0.0.0.0/0 from write_access.allowed_sources.
+
+  - id: CHK-17
+    obligation: OBL-24-RA
+    title: Vendor remote access is on-demand
+    asset: vendor-ra
+    artifact: ra_policy.json
+    type: json_equals
+    path: access_mode
+    value: on-demand
+    severity: High
+    root_cause: Integrator requested persistent access for support SLA.
+    remediation: Switch to on-demand activation per approved work order; auto-disable after session.
+
+  - id: CHK-18
+    obligation: OBL-24-RA
+    title: Vendor sessions are recorded
+    asset: vendor-ra
+    artifact: ra_policy.json
+    type: json_equals
+    path: session_recording
+    value: true
+    severity: Medium
+    root_cause: Recording licence not procured.
+    remediation: Enable session recording and retain with SIEM logs.
+
+  - id: CHK-19
+    obligation: OBL-24-RA
+    title: Vendor access requires MFA
+    asset: vendor-ra
+    artifact: ra_policy.json
+    type: json_equals
+    path: mfa_required
+    value: true
+    severity: High
+    root_cause: n/a
+    remediation: Enforce MFA.
+
+  - id: CHK-20
+    obligation: OBL-CERTIN-03
+    title: IR plan mandates 6-hour reporting to CERT-In
+    asset: grc-docs
+    artifact: incident_response_plan.md
+    type: regex_present
+    pattern: '(within\s+(6|six)\s*(\(6\)\s*)?hours|6-hour)'
+    severity: High
+    root_cause: IR plan last revised 2024 and not aligned with CERT-In 2022 Directions.
+    remediation: Revise IRP-OT-004 section 4 to 6 hours from noticing; re-approve; brief responders.
+
+  - id: CHK-21
+    obligation: OBL-FS-04
+    title: Quarterly self-audit completed within 92 days
+    asset: grc-docs
+    artifact: audit_calendar.json
+    type: date_within_days
+    path: self_audit.last_completed
+    days: 92
+    severity: Medium
+    root_cause: Self-audit not scheduled with an owner.
+    remediation: Complete this self-audit (Exercise 5.1 output) and record the date.

@@ -1,0 +1,7 @@
+{
+  "domain": "otdom.local",
+  "password": {"min_length": 8, "complexity": true, "max_age_days": 365, "history": 3},
+  "lockout":  {"threshold": 0, "duration_minutes": 0},
+  "mfa":      {"provider": "TOTP", "enforced_for_privileged": false},
+  "logging":  {"forward_to_siem": true, "siem": "10.20.5.40", "retention_days": 90, "storage_location": "in-country DC, Hyderabad"}
+}

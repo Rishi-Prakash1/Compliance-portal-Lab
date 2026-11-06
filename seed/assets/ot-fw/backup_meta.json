@@ -1,0 +1,9 @@
+{
+  "device": "FW-OT-01",
+  "model": "Generic Linux netfilter appliance",
+  "last_backup": "2025-03-14",
+  "backup_location": "\\\\nas01\\netcfg\\fw-ot-01\\",
+  "backup_method": "manual export",
+  "backup_owner": "netadmin",
+  "integrity_hash_recorded": false
+}

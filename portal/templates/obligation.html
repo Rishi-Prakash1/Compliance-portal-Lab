@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block body %}
+<a href="/register" class="small">← Register</a>
+<h1 class="mono">{{o.id}} <span class="tag {{status|replace(' ','-')}}">{{status}}</span></h1>
+<p class="sub">{{o.source}} · {{o.clause}}</p>
+<div class="grid g2"><div class="card"><div class="k">Requirement</div><p>{{o.requirement}}</p><div class="k">Control reference</div><p>{{o.control_ref}}</p><div class="small">Owner: {{o.owner}} · Frequency: {{o.frequency}}</div></div>
+<div class="card"><div class="k">Linked evidence</div>
+{% for l in links %}<div class="row" style="margin:8px 0"><div><span class="mono">{{l.artifact}}</span><div class="small">{{l.linked_by}} · {{l.ts}} · {{l.note}}</div><div class="small mono">sha256 {{l.sha256 or 'n/a'}}</div></div>
+<form method="post" action="/evidence/unlink/{{l.id}}" class="right"><button class="danger">unlink</button></form></div>{% else %}<p class="small">No evidence linked.</p>{% endfor %}</div></div>
+<h2>Automated checks (latest run)</h2>
+<div class="card" style="overflow-x:auto"><table><tr><th>Check</th><th>Title</th><th>Evidence</th><th>Severity</th><th>Result</th><th>Detail</th></tr>
+{% for r in res %}<tr><td class="mono">{{r.check_id}}</td><td>{{r.title}}</td><td class="mono">{{r.asset}}/{{r.artifact}}</td><td><span class="tag {{r.severity}}">{{r.severity}}</span></td><td><span class="tag {{r.status}}">{{r.status}}</span></td><td class="small">{{r.detail}}</td></tr>
+{% else %}<tr><td colspan=6 class="small">No automated checks — this obligation must be assessed with manually linked documentary evidence.</td></tr>{% endfor %}</table></div>
+{% if caps %}<h2>Corrective actions</h2><div class="card"><table>{% for c in caps %}<tr><td class="mono">{{c.id}}</td><td>{{c.gap}}</td><td><span class="tag {{c.status|replace(' ','-')}}">{{c.status}}</span></td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}

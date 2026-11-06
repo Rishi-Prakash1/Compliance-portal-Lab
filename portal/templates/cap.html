@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block body %}
+<div class="row"><div><h1>Corrective Action Plan</h1><p class="sub">Auto-raised from failing checks. Assign owners and dates; closure happens only when a re-test passes.</p></div>
+<a class="btn ghost right" href="/export/cap.csv">Export CAP CSV</a></div>
+{% if not rows %}<div class="card small">No corrective actions yet — run the analyzer.</div>{% endif %}
+<div class="grid">{% for c in rows %}
+<form method="post" class="card"><input type="hidden" name="id" value="{{c.id}}">
+<div class="row"><b class="mono">{{c.id}}</b><span class="tag {{c.severity}}">{{c.severity}}</span><span class="tag {{c.status|replace(' ','-')}}">{{c.status}}</span>
+<a class="mono small" href="/register/{{c.obligation_id}}">{{c.obligation_id}}</a><span class="mono small">{{c.check_id}}</span>
+{% if c.status not in ('Verified-Closed','Risk Accepted') and c.due < today %}<span class="tag FAIL">OVERDUE</span>{% endif %}<span class="small right">opened {{c.opened}}{% if c.closed %} · closed {{c.closed}}{% endif %}</span></div>
+<p style="margin:10px 0 4px"><b>Gap:</b> {{c.gap}}</p><p class="small" style="margin:0 0 6px"><b>Root cause:</b> {{c.root_cause}}</p>
+{% if c.status=='Verified-Closed' %}<p class="small"><b>Action:</b> {{c.action}} · <b>Owner:</b> {{c.owner or '—'}} · verified by run #{{c.verified_run}}</p>
+{% else %}<div class="grid" style="grid-template-columns:3fr 1fr 1fr 1.4fr auto;align-items:end">
+<div><label>Corrective action</label><input name="action" value="{{c.action}}"></div><div><label>Owner</label><input name="owner" value="{{c.owner}}" placeholder="assign"></div>
+<div><label>Due</label><input type="date" name="due" value="{{c.due}}"></div><div><label>Status</label><select name="status">{% for s in states %}<option {{'selected' if s==c.status}}>{{s}}</option>{% endfor %}</select></div>
+<button>Save</button></div><label>Notes / justification</label><textarea name="notes" style="min-height:40px">{{c.notes or ''}}</textarea>{% endif %}
+{% if c.status=='Verified-Closed' and c.notes %}<pre class="small mono" style="white-space:pre-wrap;margin:6px 0 0">{{c.notes|trim}}</pre>{% endif %}
+</form>{% endfor %}</div>
+{% endblock %}

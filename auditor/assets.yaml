@@ -1,0 +1,8 @@
+# Evidence sources: each asset exports its configuration over HTTP on the OT network.
+assets:
+  ot-fw:     {description: "OT boundary firewall FW-OT-01",       files: [iptables.rules, backup_meta.json]}
+  eng-ws:    {description: "Engineering workstation / OT AD IAM", files: [accounts.json, iam_policy.json, auth.log]}
+  historian: {description: "Process historian HIST-01",            files: [crypto.json, ntp.conf]}
+  plc-gw:    {description: "Modbus gateway MBGW-01 + CC register", files: [compensating_controls.json, modbus_gw.json]}
+  vendor-ra: {description: "Vendor remote access gateway",         files: [ra_policy.json]}
+  grc-docs:  {description: "GRC document server",                  files: [incident_response_plan.md, isms_policy.md, audit_calendar.json]}

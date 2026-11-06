@@ -1,0 +1,13 @@
+2026-10-30T06:00:12+05:30 EWS-01 sshd/winlogon: SUCCESS user=operator src=10.30.2.21 (HMI-01)
+2026-10-30T06:00:44+05:30 EWS-01 winlogon: SUCCESS user=operator src=10.30.2.22 (HMI-02)
+2026-10-30T09:14:03+05:30 EWS-01 winlogon: SUCCESS user=s.iyer src=10.20.5.10 method=password
+2026-10-30T11:52:19+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T11:52:21+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T11:52:24+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T11:52:26+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T11:52:29+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T11:52:31+05:30 EWS-01 winlogon: FAILURE user=s.iyer src=10.10.44.7 reason=bad_password
+2026-10-30T14:00:03+05:30 EWS-01 winlogon: SUCCESS user=operator src=10.30.2.21 (HMI-01)
+2026-10-30T14:01:10+05:30 EWS-01 winlogon: SUCCESS user=operator src=10.30.2.23 (HMI-03)
+2026-10-30T15:30:55+05:30 EWS-01 winlogon: SUCCESS user=a.rao src=10.30.2.15 method=password+totp
+2026-10-30T22:00:07+05:30 EWS-01 winlogon: SUCCESS user=operator src=10.30.2.22 (HMI-02)

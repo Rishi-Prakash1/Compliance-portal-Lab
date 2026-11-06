@@ -1,0 +1,66 @@
+# Exercise 5.1 - Compliance Obligation Register & Comprehensive Self-Audit
+# IEC 62443-2-1 / 62443-2-4 compliance range
+name: ex51-compliance
+
+x-asset: &asset
+  image: python:3.12-alpine
+  command: ["python", "-m", "http.server", "8080", "-d", "/asset"]
+  networks: [ot_net]
+  restart: unless-stopped
+
+services:
+  portal:
+    build: ./portal
+    container_name: ex51-portal
+    ports: ["8080:8080"]
+    environment:
+      REPO_URL: "http://localhost:8081"
+    volumes:
+      - evidence:/evidence:ro
+      - portal-data:/data
+    networks: [it_net]
+    restart: unless-stopped
+
+  evidence-repo:
+    image: nginx:1.27-alpine
+    container_name: ex51-evidence-repo
+    ports: ["8081:80"]
+    volumes:
+      - evidence:/srv/evidence:ro
+      - ./repo/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [it_net]
+    restart: unless-stopped
+
+  auditor:
+    build: ./auditor
+    container_name: ex51-auditor
+    hostname: auditor
+    environment:
+      PORTAL_URL: "http://portal:8080"
+      AUDITOR_NAME: "${AUDITOR_NAME:-trainee}"
+      # AUDIT_DATE: "2026-11-06"   # pin for reproducible instructor runs
+    volumes:
+      - evidence:/evidence
+      - ./auditor/rules.yaml:/opt/audit/rules.yaml
+      - ./auditor/assets.yaml:/opt/audit/assets.yaml:ro
+    networks: [it_net, ot_net]
+    command: ["sleep", "infinity"]
+    restart: unless-stopped
+
+  ot-fw:     { <<: *asset, container_name: ex51-ot-fw,     hostname: ot-fw,     volumes: ["./range/assets/ot-fw:/asset:ro"] }
+  eng-ws:    { <<: *asset, container_name: ex51-eng-ws,    hostname: eng-ws,    volumes: ["./range/assets/eng-ws:/asset:ro"] }
+  historian: { <<: *asset, container_name: ex51-historian, hostname: historian, volumes: ["./range/assets/historian:/asset:ro"] }
+  plc-gw:    { <<: *asset, container_name: ex51-plc-gw,    hostname: plc-gw,    volumes: ["./range/assets/plc-gw:/asset:ro"] }
+  vendor-ra: { <<: *asset, container_name: ex51-vendor-ra, hostname: vendor-ra, volumes: ["./range/assets/vendor-ra:/asset:ro"] }
+  grc-docs:  { <<: *asset, container_name: ex51-grc-docs,  hostname: grc-docs,  volumes: ["./range/assets/grc-docs:/asset:ro"] }
+
+networks:
+  it_net:
+    name: ex51_it_net
+  ot_net:
+    name: ex51_ot_net
+    internal: true   # OT zone: no route to host/Internet; only the auditor bridges both zones
+
+volumes:
+  evidence:
+  portal-data:

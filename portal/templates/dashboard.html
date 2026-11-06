@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block body %}
+<h1>Compliance Self-Audit — Plant Unit 2</h1>
+<p class="sub">Obligation register health, latest automated gap analysis and corrective action status.</p>
+{% if unreg %}<div class="warn"><b>Register incomplete:</b> the latest analyzer run references obligations not in your register: <span class="mono">{{unreg|join(', ')}}</span>. Add them under <a href="/register">Obligation Register</a> and re-run <span class="mono">analyze</span>.</div>{% endif %}
+<div class="grid g4">
+ <div class="card"><div class="k">Compliance score</div><div class="v">{{score}}%</div><div class="bar" style="margin-top:8px"><i style="width:{{score}}%"></i></div><div class="small" style="margin-top:6px">Obligations not non-compliant and assessed / total</div></div>
+ <div class="card"><div class="k">Obligations</div><div class="v">{{total}}</div><div class="small">{% for k,v in by.items() %}<span class="tag {{k|replace(' ','-')}}">{{k}}: {{v}}</span> {% endfor %}</div></div>
+ <div class="card"><div class="k">Open corrective actions</div><div class="v">{{open_caps}}</div><div class="small">{% for s,n in sev.items() if n %}<span class="tag {{s}}">{{s}} {{n}}</span> {% endfor %} · {{closed_caps}} closed</div></div>
+ <div class="card"><div class="k">Latest evidence snapshot</div><div class="v mono" style="font-size:16px">{{ m.collection_id if m else '—' }}</div><div class="small">{{ (m.artifacts|length ~ ' artifacts') if m else 'Run collect in the auditor container' }}</div>
+ {% if run %}<div class="small">Analyzer run #{{run.id}} · PASS {{counts.PASS}} · FAIL {{counts.FAIL}} · NO_EVIDENCE {{counts.NO_EVIDENCE}}</div>{% endif %}</div>
+</div>
+<h2>Obligation status</h2>
+<div class="card" style="overflow-x:auto"><table><tr><th>ID</th><th>Source</th><th>Title</th><th>Control ref</th><th>Checks</th><th>Evidence</th><th>Status</th></tr>
+{% for o in obs %}<tr><td class="mono"><a href="/register/{{o.id}}">{{o.id}}</a></td><td>{{o.source}}</td><td>{{o.title}}</td><td class="small">{{o.control_ref}}</td>
+<td>{{o.checks}}{% if o.fails %} <span class="tag FAIL">{{o.fails}} fail</span>{% endif %}</td><td>{{o.links}}</td><td><span class="tag {{o.status|replace(' ','-')}}">{{o.status}}</span></td></tr>{% endfor %}
+</table></div>
+{% endblock %}

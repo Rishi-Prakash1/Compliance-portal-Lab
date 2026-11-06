@@ -1,0 +1,10 @@
+{
+  "system": "RA-JUMP-01 Vendor Remote Access Gateway",
+  "access_mode": "always-on",
+  "mfa_required": true,
+  "approval_workflow": true,
+  "session_recording": false,
+  "session_timeout_minutes": 480,
+  "allowed_vendors": ["vendor_ctrl"],
+  "target_zones": ["L2 Supervisory", "L1 Control"]
+}
